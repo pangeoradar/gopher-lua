@@ -5,16 +5,16 @@ import (
 )
 
 type Position struct {
-	Source string
-	Line   int
-	Column int
+	Source string `json:"source"`
+	Line   int    `json:"line"`
+	Column int    `json:"column"`
 }
 
 type Token struct {
-	Type int
-	Name string
-	Str  string
-	Pos  Position
+	Type int      `json:"type"`
+	Name string   `json:"name"`
+	Str  string   `json:"str"`
+	Pos  Position `json:"pos"`
 }
 
 func (self *Token) String() string {
