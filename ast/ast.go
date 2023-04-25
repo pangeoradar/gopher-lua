@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"github.com/tidwall/sjson"
 	"reflect"
+	"strings"
 )
+
+type Printer interface {
+	Print(ident int) string
+}
 
 type PositionHolder interface {
 	Line() int
@@ -66,4 +71,12 @@ func ParseRule(bytes []byte) ([]Stmt, error) {
 	}
 
 	return stmts, nil
+}
+
+func PrintRule(chunks []Stmt) string {
+	builder := strings.Builder{}
+	for _, s := range chunks {
+		builder.WriteString(s.StringIndent(0))
+	}
+	return builder.String()
 }

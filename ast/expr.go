@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"strings"
 )
 
 type Expr interface {
+	fmt.Stringer
 	PositionHolder
 	exprMarker()
 }
@@ -36,7 +38,9 @@ type TrueExpr struct {
 	ConstExprBase
 }
 
-func (t TrueExpr) MarshalJSON() ([]byte, error) {
+func (t *TrueExpr) String() string { return "true" }
+
+func (t *TrueExpr) MarshalJSON() ([]byte, error) {
 	return sjson.SetBytes([]byte{}, DiscriminatorField, "true_expr")
 }
 
@@ -44,7 +48,9 @@ type FalseExpr struct {
 	ConstExprBase
 }
 
-func (f FalseExpr) MarshalJSON() ([]byte, error) {
+func (f *FalseExpr) String() string { return "false" }
+
+func (f *FalseExpr) MarshalJSON() ([]byte, error) {
 	return sjson.SetBytes([]byte{}, DiscriminatorField, "false_expr")
 }
 
@@ -52,7 +58,9 @@ type NilExpr struct {
 	ConstExprBase
 }
 
-func (n NilExpr) MarshalJSON() ([]byte, error) {
+func (n *NilExpr) String() string { return "nil" }
+
+func (n *NilExpr) MarshalJSON() ([]byte, error) {
 	return sjson.SetBytes([]byte{}, DiscriminatorField, "nil_expr")
 }
 
@@ -61,6 +69,8 @@ type NumberExpr struct {
 
 	Value string `json:"value"`
 }
+
+func (n *NumberExpr) String() string { return n.Value }
 
 func (n *NumberExpr) MarshalJSON() ([]byte, error) {
 	return marshalWithType(n, "number_expr")
@@ -76,12 +86,16 @@ func (s *StringExpr) MarshalJSON() ([]byte, error) {
 	return marshalWithType(s, "string_expr")
 }
 
+func (s *StringExpr) String() string { return fmt.Sprintf(`"%s"`, s.Value) }
+
 /* ConstExprs }}} */
 
 type Comma3Expr struct {
 	ExprBase
 	AdjustRet bool `json:"adjust_ret"`
 }
+
+func (c *Comma3Expr) String() string { return "..." }
 
 func (c *Comma3Expr) MarshalJSON() ([]byte, error) {
 	return marshalWithType(c, "comma_3_expr")
@@ -93,6 +107,8 @@ type IdentExpr struct {
 	Value string `json:"value"`
 }
 
+func (i *IdentExpr) String() string { return i.Value }
+
 func (i *IdentExpr) MarshalJSON() ([]byte, error) {
 	return marshalWithType(i, "ident_expr")
 }
@@ -102,6 +118,15 @@ type AttrGetExpr struct {
 
 	Object Expr `json:"object"`
 	Key    Expr `json:"key"`
+}
+
+func (a *AttrGetExpr) String() string {
+	switch a.Key.(type) {
+	case *NumberExpr, *UnaryLenOpExpr, *UnaryMinusOpExpr:
+		return fmt.Sprintf("%s[%s]", a.Object, a.Key)
+	default:
+		return fmt.Sprintf("%s.%s", a.Object, a.Key)
+	}
 }
 
 func (a *AttrGetExpr) UnmarshalJSON(bytes []byte) error {
@@ -140,6 +165,14 @@ type TableExpr struct {
 	Fields []*Field `json:"fields"`
 }
 
+func (t *TableExpr) String() string {
+	var fields []string
+	for _, field := range t.Fields {
+		fields = append(fields, field.String())
+	}
+	return fmt.Sprintf(`{%s}`, strings.TrimRight(strings.Join(fields, ", "), ", "))
+}
+
 func (t *TableExpr) MarshalJSON() ([]byte, error) {
 	return marshalWithType(t, "table_expr")
 }
@@ -152,6 +185,20 @@ type FuncCallExpr struct {
 	Method    string `json:"method"`
 	Args      []Expr `json:"args"`
 	AdjustRet bool   `json:"adjust_ret"`
+}
+
+func (f *FuncCallExpr) String() string {
+	var body string
+	if f.Receiver != nil {
+		body = fmt.Sprintf("%s:%s", f.Receiver, f.Method)
+	} else {
+		body = f.Func.String()
+	}
+	var args []string
+	for _, arg := range f.Args {
+		args = append(args, arg.String())
+	}
+	return fmt.Sprintf("%s(%s)", body, strings.TrimRight(strings.Join(args, ", "), ", "))
 }
 
 func (f *FuncCallExpr) UnmarshalJSON(bytes []byte) error {
@@ -203,6 +250,8 @@ type LogicalOpExpr struct {
 	Rhs      Expr   `json:"rhs"`
 }
 
+func (l *LogicalOpExpr) String() string { return fmt.Sprintf("%s %s %s", l.Lhs, l.Operator, l.Rhs) }
+
 func (l *LogicalOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Operator string          `json:"operator"`
@@ -243,6 +292,8 @@ type RelationalOpExpr struct {
 	Rhs      Expr   `json:"rhs"`
 }
 
+func (r *RelationalOpExpr) String() string { return fmt.Sprintf("%s %s %s", r.Lhs, r.Operator, r.Rhs) }
+
 func (r *RelationalOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Operator string          `json:"operator"`
@@ -282,6 +333,8 @@ type StringConcatOpExpr struct {
 	Rhs Expr `json:"rhs"`
 }
 
+func (s *StringConcatOpExpr) String() string { return fmt.Sprintf("%s..%s", s.Lhs, s.Rhs) }
+
 func (s *StringConcatOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Lhs json.RawMessage `json:"lhs"`
@@ -320,6 +373,8 @@ type ArithmeticOpExpr struct {
 	Rhs      Expr   `json:"rhs"`
 }
 
+func (a *ArithmeticOpExpr) String() string { return fmt.Sprintf("%s %s %s", a.Lhs, a.Operator, a.Rhs) }
+
 func (a *ArithmeticOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Operator string          `json:"operator"`
@@ -357,6 +412,8 @@ type UnaryMinusOpExpr struct {
 	Expr Expr `json:"expr"`
 }
 
+func (u *UnaryMinusOpExpr) String() string { return fmt.Sprintf("-%s", u.Expr) }
+
 func (u *UnaryMinusOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Expr json.RawMessage `json:"expr"`
@@ -385,6 +442,8 @@ type UnaryNotOpExpr struct {
 	ExprBase
 	Expr Expr `json:"expr"`
 }
+
+func (u *UnaryNotOpExpr) String() string { return fmt.Sprintf("not %s", u.Expr) }
 
 func (u *UnaryNotOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
@@ -415,6 +474,8 @@ type UnaryLenOpExpr struct {
 	Expr Expr `json:"expr"`
 }
 
+func (u *UnaryLenOpExpr) String() string { return fmt.Sprintf("#%s", u.Expr) }
+
 func (u *UnaryLenOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Expr json.RawMessage `json:"expr"`
@@ -444,6 +505,18 @@ type FunctionExpr struct {
 
 	ParList *ParList `json:"par_list"`
 	Stmts   []Stmt   `json:"stmts"`
+}
+
+func (f *FunctionExpr) String() string { return f.StringIndent(0) }
+
+func (f *FunctionExpr) StringIndent(indent int) string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("(%s)\n", f.ParList))
+	for _, stmt := range f.Stmts {
+		builder.WriteString(stmt.StringIndent(indent + 1))
+	}
+	builder.WriteString(fmt.Sprintf("%send\n", strings.Repeat("\t", indent)))
+	return builder.String()
 }
 
 func (f *FunctionExpr) UnmarshalJSON(bytes []byte) error {

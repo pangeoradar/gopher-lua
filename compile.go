@@ -57,6 +57,8 @@ type constLValueExpr struct {
 	Value LValue
 }
 
+func (c *constLValueExpr) String() string { return c.Value.String() }
+
 // }}}
 
 /* utilities {{{ */

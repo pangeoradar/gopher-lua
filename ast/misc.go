@@ -3,11 +3,21 @@ package ast
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type Field struct {
 	Key   Expr `json:"key"`
 	Value Expr `json:"value"`
+}
+
+// todo: добавить экранирование для зарезервированных слов
+func (f *Field) String() string {
+	rhs := ""
+	if f.Key != nil {
+		rhs = fmt.Sprintf("%s = ", f.Key)
+	}
+	return fmt.Sprintf("%s%s", rhs, f.Value)
 }
 
 func (f *Field) UnmarshalJSON(bytes []byte) error {
@@ -41,10 +51,29 @@ type ParList struct {
 	Names    []string `json:"names"`
 }
 
+func (p *ParList) String() string {
+	names := make([]string, len(p.Names))
+	copy(names, p.Names)
+	if p.HasVargs {
+		names = append(names, "...")
+	}
+	return strings.TrimRight(strings.Join(names, ", "), ", ")
+}
+
 type FuncName struct {
 	Func     Expr   `json:"func"`
 	Receiver Expr   `json:"receiver"`
 	Method   string `json:"method"`
+}
+
+func (f *FuncName) String() string {
+	var body string
+	if f.Receiver != nil {
+		body = fmt.Sprintf("%s:%s", f.Receiver, f.Method)
+	} else {
+		body = f.Func.String()
+	}
+	return body
 }
 
 func (f *FuncName) UnmarshalJSON(bytes []byte) error {

@@ -5,10 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tidwall/gjson"
+	"strings"
 )
+
+type StringerIndent interface {
+	StringIndent(int) string
+}
 
 type Stmt interface {
 	PositionHolder
+	StringerIndent
 	stmtMarker()
 }
 
@@ -23,6 +29,18 @@ type AssignStmt struct {
 
 	Lhs []Expr `json:"lhs"`
 	Rhs []Expr `json:"rhs"`
+}
+
+func (a *AssignStmt) StringIndent(ident int) string {
+	var lhs, rhs []string
+	for i := 0; i < len(lhs); i++ {
+		lhs = append(lhs, a.Lhs[i].String())
+		rhs = append(lhs, a.Rhs[i].String())
+	}
+	return fmt.Sprintf("%s%s = %s\n", strings.Repeat("\t", ident),
+		strings.TrimRight(strings.Join(lhs, ", "), ", "),
+		strings.TrimRight(strings.Join(rhs, ", "), ", "),
+	)
 }
 
 func (a *AssignStmt) UnmarshalJSON(bytes []byte) error {
@@ -68,6 +86,20 @@ type LocalAssignStmt struct {
 	Exprs []Expr   `json:"exprs"`
 }
 
+func (l *LocalAssignStmt) StringIndent(indent int) string {
+	// todo: добавить поддержку локальных функций
+	lhs := strings.TrimRight(strings.Join(l.Names, ", "), ", ")
+	rhs := ""
+	if len(l.Exprs) > 0 {
+		var exprs []string
+		for _, expr := range l.Exprs {
+			exprs = append(exprs, expr.String())
+		}
+		rhs = fmt.Sprintf(" = %s", strings.TrimRight(strings.Join(exprs, ", "), ", "))
+	}
+	return fmt.Sprintf("%s%s%s", strings.Repeat("\t", indent), lhs, rhs)
+}
+
 func (l *LocalAssignStmt) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Names []string          `json:"names"`
@@ -102,6 +134,13 @@ type FuncCallStmt struct {
 	Expr Expr `json:"expr"`
 }
 
+func (f *FuncCallStmt) StringIndent(indent int) string {
+	// todo: с первого взгляда этот тип создан для того чтобы описывать
+	// todo: единичный вызов функции на строке. но в парсере логика сложнее.
+	// todo: хорошо бы разобраться @a.odintsov
+	return fmt.Sprintf("%s%s", strings.Repeat("\t", indent), f.Expr)
+}
+
 func (f *FuncCallStmt) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Expr json.RawMessage `json:"expr"`
@@ -130,6 +169,16 @@ type DoBlockStmt struct {
 	StmtBase
 
 	Stmts []Stmt `json:"stmts"`
+}
+
+func (d *DoBlockStmt) StringIndent(indent int) string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("%sdo\n", strings.Repeat("\t", indent)))
+	for _, stmt := range d.Stmts {
+		builder.WriteString(stmt.StringIndent(indent + 1))
+	}
+	builder.WriteString(fmt.Sprintf("%send\n", strings.Repeat("\t", indent)))
+	return builder.String()
 }
 
 func (d *DoBlockStmt) UnmarshalJSON(bytes []byte) error {
@@ -164,6 +213,16 @@ type WhileStmt struct {
 
 	Condition Expr   `json:"condition"`
 	Stmts     []Stmt `json:"stmts"`
+}
+
+func (w *WhileStmt) StringIndent(indent int) string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("%swhile %s do\n", strings.Repeat("\t", indent), w.Condition))
+	for _, stmt := range w.Stmts {
+		builder.WriteString(stmt.StringIndent(indent + 1))
+	}
+	builder.WriteString(fmt.Sprintf("%send\n", strings.Repeat("\t", indent)))
+	return builder.String()
 }
 
 func (w *WhileStmt) UnmarshalJSON(bytes []byte) error {
@@ -206,6 +265,16 @@ type RepeatStmt struct {
 	Stmts     []Stmt `json:"stmts"`
 }
 
+func (r *RepeatStmt) StringIndent(indent int) string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("%srepeat\n", strings.Repeat("\t", indent)))
+	for _, stmt := range r.Stmts {
+		builder.WriteString(stmt.StringIndent(indent + 1))
+	}
+	builder.WriteString(fmt.Sprintf("%suntil %s\n", strings.Repeat("\t", indent), r.Condition))
+	return builder.String()
+}
+
 func (r *RepeatStmt) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
 		Condition json.RawMessage   `json:"condition"`
@@ -245,6 +314,22 @@ type IfStmt struct {
 	Condition Expr   `json:"condition"`
 	Then      []Stmt `json:"then"`
 	Else      []Stmt `json:"else"`
+}
+
+func (i *IfStmt) StringIndent(indent int) string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("%sif %s then\n", strings.Repeat("\t", indent), i.Condition))
+	for _, stmt := range i.Then {
+		builder.WriteString(stmt.StringIndent(indent + 1))
+	}
+	if len(i.Else) > 0 {
+		builder.WriteString(fmt.Sprintf("%selse\n", strings.Repeat("\t", indent)))
+		for _, stmt := range i.Else {
+			builder.WriteString(stmt.StringIndent(indent + 1))
+		}
+	}
+	builder.WriteString(fmt.Sprintf("%send\n", strings.Repeat("\t", indent)))
+	return builder.String()
 }
 
 func (i *IfStmt) UnmarshalJSON(bytes []byte) error {
@@ -297,6 +382,21 @@ type NumberForStmt struct {
 	Limit Expr   `json:"limit"`
 	Step  Expr   `json:"step"`
 	Stmts []Stmt `json:"stmts"`
+}
+
+func (n *NumberForStmt) StringIndent(indent int) string {
+	exprs := []string{n.Init.String(), n.Limit.String()}
+	if n.Step != nil {
+		exprs = append(exprs, n.Step.String())
+	}
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("%sfor %s = %s do\n", strings.Repeat("\t", indent),
+		n.Name, strings.TrimRight(strings.Join(exprs, ", "), ", ")))
+	for _, stmt := range n.Stmts {
+		builder.WriteString(stmt.StringIndent(indent + 1))
+	}
+	builder.WriteString(fmt.Sprintf("%send\n", strings.Repeat("\t", indent)))
+	return builder.String()
 }
 
 func (n *NumberForStmt) MarshalJSON() ([]byte, error) {
@@ -353,6 +453,24 @@ type GenericForStmt struct {
 	Stmts []Stmt   `json:"stmts"`
 }
 
+func (g *GenericForStmt) StringIndent(indent int) string {
+	var exprs []string
+	for _, expr := range g.Exprs {
+		exprs = append(exprs, expr.String())
+	}
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("%sfor %s in %s do\n",
+		strings.Repeat("\t", indent),
+		strings.TrimRight(strings.Join(g.Names, ", "), ", "),
+		strings.TrimRight(strings.Join(exprs, ", "), ", "),
+	))
+	for _, stmt := range g.Stmts {
+		builder.WriteString(stmt.StringIndent(indent + 1))
+	}
+	builder.WriteString(fmt.Sprintf("%send\n", strings.Repeat("\t", indent)))
+	return builder.String()
+}
+
 func (g *GenericForStmt) MarshalJSON() ([]byte, error) {
 	return marshalWithType(g, "generic_for_stmt")
 }
@@ -397,6 +515,14 @@ type FuncDefStmt struct {
 	Func *FunctionExpr `json:"func"`
 }
 
+func (f *FuncDefStmt) StringIndent(indent int) string {
+	return fmt.Sprintf("%s%s%s",
+		strings.Repeat("\t", indent),
+		f.Name,
+		f.Func.StringIndent(indent),
+	)
+}
+
 func (f *FuncDefStmt) MarshalJSON() ([]byte, error) {
 	return marshalWithType(f, "func_def_stmt")
 }
@@ -405,6 +531,15 @@ type ReturnStmt struct {
 	StmtBase
 
 	Exprs []Expr `json:"exprs"`
+}
+
+func (r *ReturnStmt) StringIndent(indent int) string {
+	var exprs []string
+	for _, expr := range r.Exprs {
+		exprs = append(exprs, expr.String())
+	}
+	return fmt.Sprintf("%sreturn %s\n", strings.Repeat("\t", indent),
+		strings.TrimRight(strings.Join(exprs, ", "), ", "))
 }
 
 func (r *ReturnStmt) MarshalJSON() ([]byte, error) {
@@ -438,6 +573,10 @@ type BreakStmt struct {
 	StmtBase
 }
 
+func (b *BreakStmt) StringIndent(indent int) string {
+	return fmt.Sprintf("%sbreak\n", strings.Repeat("\t", indent))
+}
+
 func (b *BreakStmt) MarshalJSON() ([]byte, error) {
 	return marshalWithType(b, "break_stmt")
 }
@@ -452,10 +591,18 @@ func (l *LabelStmt) MarshalJSON() ([]byte, error) {
 	return marshalWithType(l, "label_stmt")
 }
 
+func (l *LabelStmt) StringIndent(indent int) string {
+	return fmt.Sprintf("%s::%s::\n", strings.Repeat("\t", indent), l.Name)
+}
+
 type GotoStmt struct {
 	StmtBase
 
 	Label string `json:"label"`
+}
+
+func (g *GotoStmt) StringIndent(indent int) string {
+	return fmt.Sprintf("%sgoto %s\n", strings.Repeat("\t", indent), g.Label)
 }
 
 func (g *GotoStmt) MarshalJSON() ([]byte, error) {
