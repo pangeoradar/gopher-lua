@@ -15,7 +15,7 @@ type Field struct {
 func (f *Field) String() string {
 	rhs := ""
 	if f.Key != nil {
-		rhs = fmt.Sprintf("%s = ", f.Key)
+		rhs = fmt.Sprintf("%s = ", strings.Trim(f.Key.String(), "\""))
 	}
 	return fmt.Sprintf("%s%s", rhs, f.Value)
 }

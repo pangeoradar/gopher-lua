@@ -86,7 +86,12 @@ func (s *StringExpr) MarshalJSON() ([]byte, error) {
 	return marshalWithType(s, "string_expr")
 }
 
-func (s *StringExpr) String() string { return fmt.Sprintf(`"%s"`, s.Value) }
+func (s *StringExpr) String() string {
+	if strings.Contains(s.Value, "\n") {
+		return fmt.Sprintf(`[[%s]]`, s.Value)
+	}
+	return fmt.Sprintf(`"%s"`, s.Value)
+}
 
 /* ConstExprs }}} */
 
@@ -124,6 +129,8 @@ func (a *AttrGetExpr) String() string {
 	switch a.Key.(type) {
 	case *NumberExpr, *UnaryLenOpExpr, *UnaryMinusOpExpr:
 		return fmt.Sprintf("%s[%s]", a.Object, a.Key)
+	case *StringExpr:
+		return fmt.Sprintf("%s.%s", a.Object, strings.Trim(a.Key.String(), "\""))
 	default:
 		return fmt.Sprintf("%s.%s", a.Object, a.Key)
 	}

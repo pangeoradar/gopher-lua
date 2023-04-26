@@ -31,13 +31,13 @@ type AssignStmt struct {
 	Rhs []Expr `json:"rhs"`
 }
 
-func (a *AssignStmt) StringIndent(ident int) string {
+func (a *AssignStmt) StringIndent(indent int) string {
 	var lhs, rhs []string
-	for i := 0; i < len(lhs); i++ {
+	for i := 0; i < len(a.Lhs); i++ {
 		lhs = append(lhs, a.Lhs[i].String())
-		rhs = append(lhs, a.Rhs[i].String())
+		rhs = append(rhs, a.Rhs[i].String())
 	}
-	return fmt.Sprintf("%s%s = %s\n", strings.Repeat("\t", ident),
+	return fmt.Sprintf("%s%s = %s\n", strings.Repeat("\t", indent),
 		strings.TrimRight(strings.Join(lhs, ", "), ", "),
 		strings.TrimRight(strings.Join(rhs, ", "), ", "),
 	)
@@ -97,7 +97,7 @@ func (l *LocalAssignStmt) StringIndent(indent int) string {
 		}
 		rhs = fmt.Sprintf(" = %s", strings.TrimRight(strings.Join(exprs, ", "), ", "))
 	}
-	return fmt.Sprintf("%s%s%s", strings.Repeat("\t", indent), lhs, rhs)
+	return fmt.Sprintf("%s%s%s\n", strings.Repeat("\t", indent), lhs, rhs)
 }
 
 func (l *LocalAssignStmt) UnmarshalJSON(bytes []byte) error {
@@ -138,7 +138,8 @@ func (f *FuncCallStmt) StringIndent(indent int) string {
 	// todo: с первого взгляда этот тип создан для того чтобы описывать
 	// todo: единичный вызов функции на строке. но в парсере логика сложнее.
 	// todo: хорошо бы разобраться @a.odintsov
-	return fmt.Sprintf("%s%s", strings.Repeat("\t", indent), f.Expr)
+	s := fmt.Sprintf("%s%s\n", strings.Repeat("\t", indent), f.Expr)
+	return s
 }
 
 func (f *FuncCallStmt) UnmarshalJSON(bytes []byte) error {
@@ -516,7 +517,7 @@ type FuncDefStmt struct {
 }
 
 func (f *FuncDefStmt) StringIndent(indent int) string {
-	return fmt.Sprintf("%s%s%s",
+	return fmt.Sprintf("%sfunction %s%s",
 		strings.Repeat("\t", indent),
 		f.Name,
 		f.Func.StringIndent(indent),
