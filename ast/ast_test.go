@@ -34,3 +34,308 @@ func TestRulePrint(t *testing.T) {
 
 	fmt.Println(PrintRule(r))
 }
+
+func TestNestedLogicalOp(t *testing.T) {
+	p := json.RawMessage(`[
+  {
+    "name": {
+      "func": {
+        "value": "on_logline",
+        "_type": "ident_expr"
+      },
+      "receiver": null,
+      "method": ""
+    },
+    "func": {
+      "par_list": {
+        "has_vargs": false,
+        "names": [
+          "logline"
+        ]
+      },
+      "stmts": [
+        {
+          "condition": {
+            "operator": "and",
+            "lhs": {
+              "operator": "and",
+              "lhs": {
+                "operator": "==",
+                "lhs": {
+                  "func": null,
+                  "receiver": {
+                    "value": "logline",
+                    "_type": "ident_expr"
+                  },
+                  "method": "get",
+                  "args": [
+                    {
+                      "value": "event.anomaly.name",
+                      "_type": "string_expr"
+                    },
+                    {
+                      "value": "",
+                      "_type": "string_expr"
+                    }
+                  ],
+                  "adjust_ret": false,
+                  "_type": "func_call_expr"
+                },
+                "rhs": {
+                  "value": "test",
+                  "_type": "string_expr"
+                },
+                "_type": "relational_op_expr"
+              },
+              "rhs": {
+                "operator": "==",
+                "lhs": {
+                  "func": null,
+                  "receiver": {
+                    "value": "logline",
+                    "_type": "ident_expr"
+                  },
+                  "method": "get",
+                  "args": [
+                    {
+                      "value": "event.application.target",
+                      "_type": "string_expr"
+                    },
+                    {
+                      "value": "",
+                      "_type": "string_expr"
+                    }
+                  ],
+                  "adjust_ret": false,
+                  "_type": "func_call_expr"
+                },
+                "rhs": {
+                  "value": "sdddsd",
+                  "_type": "string_expr"
+                },
+                "_type": "relational_op_expr"
+              },
+              "_type": "logical_op_expr"
+            },
+            "rhs": {
+              "operator": "or",
+              "lhs": {
+                "func": {
+                  "value": "contains",
+                  "_type": "ident_expr"
+                },
+                "receiver": null,
+                "method": "",
+                "args": [
+                  {
+                    "fields": [
+                      {
+                        "key": null,
+                        "value": {
+                          "value": "sdddsddsddsdd",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": null,
+                        "value": {
+                          "value": "sddsdddsddsdds",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": null,
+                        "value": {
+                          "value": "dsddsddsd",
+                          "_type": "string_expr"
+                        }
+                      }
+                    ],
+                    "_type": "table_expr"
+                  },
+                  {
+                    "func": null,
+                    "receiver": {
+                      "value": "logline",
+                      "_type": "ident_expr"
+                    },
+                    "method": "get",
+                    "args": [
+                      {
+                        "value": "",
+                        "_type": "string_expr"
+                      },
+                      {
+                        "value": "",
+                        "_type": "string_expr"
+                      }
+                    ],
+                    "adjust_ret": false,
+                    "_type": "func_call_expr"
+                  }
+                ],
+                "adjust_ret": false,
+                "_type": "func_call_expr"
+              },
+              "rhs": {
+                "func": null,
+                "receiver": {
+                  "func": null,
+                  "receiver": {
+                    "value": "logline",
+                    "_type": "ident_expr"
+                  },
+                  "method": "get",
+                  "args": [
+                    {
+                      "value": "event.email.message.id",
+                      "_type": "string_expr"
+                    },
+                    {
+                      "value": "",
+                      "_type": "string_expr"
+                    }
+                  ],
+                  "adjust_ret": false,
+                  "_type": "func_call_expr"
+                },
+                "method": "contains",
+                "args": [
+                  {
+                    "value": "sddddsd",
+                    "_type": "string_expr"
+                  }
+                ],
+                "adjust_ret": false,
+                "_type": "func_call_expr"
+              },
+              "_type": "logical_op_expr"
+            },
+            "_type": "logical_op_expr"
+          },
+          "then": [
+            {
+              "expr": {
+                "func": {
+                  "value": "alert",
+                  "_type": "ident_expr"
+                },
+                "receiver": null,
+                "method": "",
+                "args": [
+                  {
+                    "fields": [
+                      {
+                        "key": {
+                          "value": "template",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "risk_level",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "asset_ip",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "asset_hostname",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "asset_fqdn",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "asset_mac",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "create_incident",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "_type": "false_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "assign_to_customer",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "_type": "false_expr"
+                        }
+                      },
+                      {
+                        "key": {
+                          "value": "incident_identifier",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      }
+                    ],
+                    "_type": "table_expr"
+                  }
+                ],
+                "adjust_ret": false,
+                "_type": "func_call_expr"
+              },
+              "_type": "func_call_stmt"
+            }
+          ],
+          "else": null,
+          "_type": "if_stmt"
+        }
+      ],
+      "_type": "function_expr"
+    },
+    "_type": "func_def_stmt"
+  }
+]`)
+	r, err := ParseRule(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(PrintRule(r))
+}

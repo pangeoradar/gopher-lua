@@ -257,7 +257,20 @@ type LogicalOpExpr struct {
 	Rhs      Expr   `json:"rhs"`
 }
 
-func (l *LogicalOpExpr) String() string { return fmt.Sprintf("%s %s %s", l.Lhs, l.Operator, l.Rhs) }
+func (l *LogicalOpExpr) String() string {
+	var lhs, rhs string
+	if v, ok := l.Lhs.(*LogicalOpExpr); ok && v.Operator != l.Operator {
+		lhs = fmt.Sprintf("(%s)", l.Lhs)
+	} else {
+		lhs = l.Lhs.String()
+	}
+	if v, ok := l.Rhs.(*LogicalOpExpr); ok && v.Operator != l.Operator {
+		rhs = fmt.Sprintf("(%s)", l.Rhs)
+	} else {
+		rhs = l.Rhs.String()
+	}
+	return fmt.Sprintf("%s %s %s", lhs, l.Operator, rhs)
+}
 
 func (l *LogicalOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {

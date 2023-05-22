@@ -97,7 +97,7 @@ func (l *LocalAssignStmt) StringIndent(indent int) string {
 		}
 		rhs = fmt.Sprintf(" = %s", strings.TrimRight(strings.Join(exprs, ", "), ", "))
 	}
-	return fmt.Sprintf("%s%s%s\n", strings.Repeat("\t", indent), lhs, rhs)
+	return fmt.Sprintf("%slocal %s%s\n", strings.Repeat("\t", indent), lhs, rhs)
 }
 
 func (l *LocalAssignStmt) UnmarshalJSON(bytes []byte) error {
@@ -138,8 +138,7 @@ func (f *FuncCallStmt) StringIndent(indent int) string {
 	// todo: с первого взгляда этот тип создан для того чтобы описывать
 	// todo: единичный вызов функции на строке. но в парсере логика сложнее.
 	// todo: хорошо бы разобраться @a.odintsov
-	s := fmt.Sprintf("%s%s\n", strings.Repeat("\t", indent), f.Expr)
-	return s
+	return fmt.Sprintf("%s%s\n", strings.Repeat("\t", indent), f.Expr)
 }
 
 func (f *FuncCallStmt) UnmarshalJSON(bytes []byte) error {
