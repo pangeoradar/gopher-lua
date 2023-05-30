@@ -70,7 +70,35 @@ func TestNestedLogicalOp(t *testing.T) {
                   "method": "get",
                   "args": [
                     {
-                      "value": "event.anomaly.name",
+                      "value": "action",
+                      "_type": "string_expr"
+                    },
+                    {
+                      "value": "",
+                      "_type": "string_expr"
+                    }
+                  ],
+                  "adjust_ret": false,
+                  "_type": "func_call_expr"
+                },
+                "rhs": {
+                  "value": "1234",
+                  "_type": "string_expr"
+                },
+                "_type": "relational_op_expr"
+              },
+              "rhs": {
+                "operator": "==",
+                "lhs": {
+                  "func": null,
+                  "receiver": {
+                    "value": "logline",
+                    "_type": "ident_expr"
+                  },
+                  "method": "get",
+                  "args": [
+                    {
+                      "value": "event.category",
                       "_type": "string_expr"
                     },
                     {
@@ -87,73 +115,14 @@ func TestNestedLogicalOp(t *testing.T) {
                 },
                 "_type": "relational_op_expr"
               },
-              "rhs": {
-                "operator": "==",
-                "lhs": {
-                  "func": null,
-                  "receiver": {
-                    "value": "logline",
-                    "_type": "ident_expr"
-                  },
-                  "method": "get",
-                  "args": [
-                    {
-                      "value": "event.application.target",
-                      "_type": "string_expr"
-                    },
-                    {
-                      "value": "",
-                      "_type": "string_expr"
-                    }
-                  ],
-                  "adjust_ret": false,
-                  "_type": "func_call_expr"
-                },
-                "rhs": {
-                  "value": "sdddsd",
-                  "_type": "string_expr"
-                },
-                "_type": "relational_op_expr"
-              },
               "_type": "logical_op_expr"
             },
             "rhs": {
-              "operator": "or",
-              "lhs": {
-                "func": {
-                  "value": "contains",
-                  "_type": "ident_expr"
-                },
-                "receiver": null,
-                "method": "",
-                "args": [
-                  {
-                    "fields": [
-                      {
-                        "key": null,
-                        "value": {
-                          "value": "sdddsddsddsdd",
-                          "_type": "string_expr"
-                        }
-                      },
-                      {
-                        "key": null,
-                        "value": {
-                          "value": "sddsdddsddsdds",
-                          "_type": "string_expr"
-                        }
-                      },
-                      {
-                        "key": null,
-                        "value": {
-                          "value": "dsddsddsd",
-                          "_type": "string_expr"
-                        }
-                      }
-                    ],
-                    "_type": "table_expr"
-                  },
-                  {
+              "expr": {
+                "operator": "or",
+                "lhs": {
+                  "operator": "==",
+                  "lhs": {
                     "func": null,
                     "receiver": {
                       "value": "logline",
@@ -162,7 +131,7 @@ func TestNestedLogicalOp(t *testing.T) {
                     "method": "get",
                     "args": [
                       {
-                        "value": "",
+                        "value": "event.severity",
                         "_type": "string_expr"
                       },
                       {
@@ -172,46 +141,166 @@ func TestNestedLogicalOp(t *testing.T) {
                     ],
                     "adjust_ret": false,
                     "_type": "func_call_expr"
-                  }
-                ],
-                "adjust_ret": false,
-                "_type": "func_call_expr"
-              },
-              "rhs": {
-                "func": null,
-                "receiver": {
-                  "func": null,
-                  "receiver": {
-                    "value": "logline",
-                    "_type": "ident_expr"
                   },
-                  "method": "get",
-                  "args": [
-                    {
-                      "value": "event.email.message.id",
-                      "_type": "string_expr"
-                    },
-                    {
-                      "value": "",
-                      "_type": "string_expr"
-                    }
-                  ],
-                  "adjust_ret": false,
-                  "_type": "func_call_expr"
-                },
-                "method": "contains",
-                "args": [
-                  {
-                    "value": "sddddsd",
+                  "rhs": {
+                    "value": "error",
                     "_type": "string_expr"
-                  }
-                ],
-                "adjust_ret": false,
-                "_type": "func_call_expr"
+                  },
+                  "_type": "relational_op_expr"
+                },
+                "rhs": {
+                  "expr": {
+                    "func": null,
+                    "receiver": {
+                      "func": null,
+                      "receiver": {
+                        "value": "logline",
+                        "_type": "ident_expr"
+                      },
+                      "method": "get",
+                      "args": [
+                        {
+                          "value": "event.uuid",
+                          "_type": "string_expr"
+                        },
+                        {
+                          "value": "",
+                          "_type": "string_expr"
+                        }
+                      ],
+                      "adjust_ret": false,
+                      "_type": "func_call_expr"
+                    },
+                    "method": "contains",
+                    "args": [
+                      {
+                        "value": "m",
+                        "_type": "string_expr"
+                      }
+                    ],
+                    "adjust_ret": false,
+                    "_type": "func_call_expr"
+                  },
+                  "_type": "unary_not_op_expr"
+                },
+                "_type": "logical_op_expr"
               },
-              "_type": "logical_op_expr"
+              "_type": "unary_not_op_expr"
             },
             "_type": "logical_op_expr"
+          },
+          "then": [
+            {
+              "expr": {
+                "func": null,
+                "receiver": {
+                  "value": "grouper1",
+                  "_type": "ident_expr"
+                },
+                "method": "feed",
+                "args": [
+                  {
+                    "value": "logline",
+                    "_type": "ident_expr"
+                  }
+                ],
+                "adjust_ret": false,
+                "_type": "func_call_expr"
+              },
+              "_type": "func_call_stmt"
+            }
+          ],
+          "else": null,
+          "_type": "if_stmt"
+        }
+      ],
+      "_type": "function_expr"
+    },
+    "_type": "func_def_stmt"
+  },
+  {
+    "name": {
+      "func": {
+        "value": "on_grouped",
+        "_type": "ident_expr"
+      },
+      "receiver": null,
+      "method": ""
+    },
+    "func": {
+      "par_list": {
+        "has_vargs": false,
+        "names": [
+          "grouped"
+        ]
+      },
+      "stmts": [
+        {
+          "names": [
+            "logline"
+          ],
+          "exprs": [
+            {
+              "object": {
+                "object": {
+                  "object": {
+                    "value": "grouped",
+                    "_type": "ident_expr"
+                  },
+                  "key": {
+                    "value": "aggregatedData",
+                    "_type": "string_expr"
+                  },
+                  "_type": "attr_get_expr"
+                },
+                "key": {
+                  "value": "loglines",
+                  "_type": "string_expr"
+                },
+                "_type": "attr_get_expr"
+              },
+              "key": {
+                "value": "1",
+                "_type": "number_expr"
+              },
+              "_type": "attr_get_expr"
+            }
+          ],
+          "_type": "local_assign_stmt"
+        },
+        {
+          "condition": {
+            "operator": "\u003e=",
+            "lhs": {
+              "object": {
+                "object": {
+                  "object": {
+                    "value": "grouped",
+                    "_type": "ident_expr"
+                  },
+                  "key": {
+                    "value": "aggregatedData",
+                    "_type": "string_expr"
+                  },
+                  "_type": "attr_get_expr"
+                },
+                "key": {
+                  "value": "aggregated",
+                  "_type": "string_expr"
+                },
+                "_type": "attr_get_expr"
+              },
+              "key": {
+                "value": "total",
+                "_type": "string_expr"
+              },
+              "_type": "attr_get_expr"
+            },
+            "rhs": {
+              "value": "1",
+              "_type": "number_expr"
+            },
+            "_type": "relational_op_expr"
           },
           "then": [
             {
@@ -241,8 +330,8 @@ func TestNestedLogicalOp(t *testing.T) {
                           "_type": "string_expr"
                         },
                         "value": {
-                          "value": "",
-                          "_type": "string_expr"
+                          "value": "0.0",
+                          "_type": "number_expr"
                         }
                       },
                       {
@@ -251,8 +340,20 @@ func TestNestedLogicalOp(t *testing.T) {
                           "_type": "string_expr"
                         },
                         "value": {
-                          "value": "",
-                          "_type": "string_expr"
+                          "func": null,
+                          "receiver": {
+                            "value": "logline",
+                            "_type": "ident_expr"
+                          },
+                          "method": "get_asset_data",
+                          "args": [
+                            {
+                              "value": "",
+                              "_type": "string_expr"
+                            }
+                          ],
+                          "adjust_ret": false,
+                          "_type": "func_call_expr"
                         }
                       },
                       {
@@ -261,8 +362,20 @@ func TestNestedLogicalOp(t *testing.T) {
                           "_type": "string_expr"
                         },
                         "value": {
-                          "value": "",
-                          "_type": "string_expr"
+                          "func": null,
+                          "receiver": {
+                            "value": "logline",
+                            "_type": "ident_expr"
+                          },
+                          "method": "get_asset_data",
+                          "args": [
+                            {
+                              "value": "",
+                              "_type": "string_expr"
+                            }
+                          ],
+                          "adjust_ret": false,
+                          "_type": "func_call_expr"
                         }
                       },
                       {
@@ -271,8 +384,20 @@ func TestNestedLogicalOp(t *testing.T) {
                           "_type": "string_expr"
                         },
                         "value": {
-                          "value": "",
-                          "_type": "string_expr"
+                          "func": null,
+                          "receiver": {
+                            "value": "logline",
+                            "_type": "ident_expr"
+                          },
+                          "method": "get_asset_data",
+                          "args": [
+                            {
+                              "value": "",
+                              "_type": "string_expr"
+                            }
+                          ],
+                          "adjust_ret": false,
+                          "_type": "func_call_expr"
                         }
                       },
                       {
@@ -281,8 +406,20 @@ func TestNestedLogicalOp(t *testing.T) {
                           "_type": "string_expr"
                         },
                         "value": {
-                          "value": "",
-                          "_type": "string_expr"
+                          "func": null,
+                          "receiver": {
+                            "value": "logline",
+                            "_type": "ident_expr"
+                          },
+                          "method": "get_asset_data",
+                          "args": [
+                            {
+                              "value": "",
+                              "_type": "string_expr"
+                            }
+                          ],
+                          "adjust_ret": false,
+                          "_type": "func_call_expr"
                         }
                       },
                       {
@@ -312,6 +449,30 @@ func TestNestedLogicalOp(t *testing.T) {
                           "value": "",
                           "_type": "string_expr"
                         }
+                      },
+                      {
+                        "key": {
+                          "value": "logs",
+                          "_type": "string_expr"
+                        },
+                        "value": {
+                          "object": {
+                            "object": {
+                              "value": "grouped",
+                              "_type": "ident_expr"
+                            },
+                            "key": {
+                              "value": "aggregatedData",
+                              "_type": "string_expr"
+                            },
+                            "_type": "attr_get_expr"
+                          },
+                          "key": {
+                            "value": "loglines",
+                            "_type": "string_expr"
+                          },
+                          "_type": "attr_get_expr"
+                        }
                       }
                     ],
                     "_type": "table_expr"
@@ -330,6 +491,86 @@ func TestNestedLogicalOp(t *testing.T) {
       "_type": "function_expr"
     },
     "_type": "func_def_stmt"
+  },
+  {
+    "lhs": [
+      {
+        "value": "grouper1",
+        "_type": "ident_expr"
+      }
+    ],
+    "rhs": [
+      {
+        "func": {
+          "object": {
+            "value": "grouper",
+            "_type": "ident_expr"
+          },
+          "key": {
+            "value": "new",
+            "_type": "string_expr"
+          },
+          "_type": "attr_get_expr"
+        },
+        "receiver": null,
+        "method": "",
+        "args": [
+          {
+            "fields": [
+              {
+                "key": null,
+                "value": {
+                  "value": "target.host.ip",
+                  "_type": "string_expr"
+                }
+              },
+              {
+                "key": null,
+                "value": {
+                  "value": "target.host.hostname",
+                  "_type": "string_expr"
+                }
+              }
+            ],
+            "_type": "table_expr"
+          },
+          {
+            "fields": [
+              {
+                "key": null,
+                "value": {
+                  "value": "target.host.ip",
+                  "_type": "string_expr"
+                }
+              },
+              {
+                "key": null,
+                "value": {
+                  "value": "target.host.hostname",
+                  "_type": "string_expr"
+                }
+              }
+            ],
+            "_type": "table_expr"
+          },
+          {
+            "value": "@timestamp,RFC3339Nano",
+            "_type": "string_expr"
+          },
+          {
+            "value": "5m",
+            "_type": "string_expr"
+          },
+          {
+            "value": "on_grouped",
+            "_type": "ident_expr"
+          }
+        ],
+        "adjust_ret": false,
+        "_type": "func_call_expr"
+      }
+    ],
+    "_type": "assign_stmt"
   }
 ]`)
 	r, err := ParseRule(p)

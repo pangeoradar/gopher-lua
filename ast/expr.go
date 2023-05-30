@@ -463,7 +463,14 @@ type UnaryNotOpExpr struct {
 	Expr Expr `json:"expr"`
 }
 
-func (u *UnaryNotOpExpr) String() string { return fmt.Sprintf("not %s", u.Expr) }
+func (u *UnaryNotOpExpr) String() string {
+	switch u.Expr.(type) {
+	case *LogicalOpExpr:
+		return fmt.Sprintf("not (%s)", u.Expr)
+	default:
+		return fmt.Sprintf("not %s", u.Expr)
+	}
+}
 
 func (u *UnaryNotOpExpr) UnmarshalJSON(bytes []byte) error {
 	var temp struct {
