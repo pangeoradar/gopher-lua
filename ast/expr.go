@@ -197,7 +197,11 @@ type FuncCallExpr struct {
 func (f *FuncCallExpr) String() string {
 	var body string
 	if f.Receiver != nil {
-		body = fmt.Sprintf("%s:%s", f.Receiver, f.Method)
+		receiver := "%s"
+		if _, ok := f.Receiver.(*StringExpr); ok {
+			receiver = "(%s)"
+		}
+		body = fmt.Sprintf("%s:%s", fmt.Sprintf(receiver, f.Receiver), f.Method)
 	} else {
 		body = f.Func.String()
 	}

@@ -60,32 +60,64 @@ func TestNestedLogicalOp(t *testing.T) {
             "lhs": {
               "operator": "and",
               "lhs": {
-                "operator": "==",
+                "operator": "and",
                 "lhs": {
-                  "func": null,
-                  "receiver": {
-                    "value": "logline",
-                    "_type": "ident_expr"
-                  },
-                  "method": "get",
-                  "args": [
-                    {
-                      "value": "action",
-                      "_type": "string_expr"
+                  "operator": "==",
+                  "lhs": {
+                    "func": null,
+                    "receiver": {
+                      "value": "logline",
+                      "_type": "ident_expr"
                     },
-                    {
-                      "value": "",
-                      "_type": "string_expr"
-                    }
-                  ],
-                  "adjust_ret": false,
-                  "_type": "func_call_expr"
+                    "method": "get",
+                    "args": [
+                      {
+                        "value": "action",
+                        "_type": "string_expr"
+                      },
+                      {
+                        "value": "",
+                        "_type": "string_expr"
+                      }
+                    ],
+                    "adjust_ret": false,
+                    "_type": "func_call_expr"
+                  },
+                  "rhs": {
+                    "value": "1234",
+                    "_type": "string_expr"
+                  },
+                  "_type": "relational_op_expr"
                 },
                 "rhs": {
-                  "value": "1234",
-                  "_type": "string_expr"
+                  "operator": "==",
+                  "lhs": {
+                    "func": null,
+                    "receiver": {
+                      "value": "logline",
+                      "_type": "ident_expr"
+                    },
+                    "method": "get",
+                    "args": [
+                      {
+                        "value": "event.category",
+                        "_type": "string_expr"
+                      },
+                      {
+                        "value": "",
+                        "_type": "string_expr"
+                      }
+                    ],
+                    "adjust_ret": false,
+                    "_type": "func_call_expr"
+                  },
+                  "rhs": {
+                    "value": "test",
+                    "_type": "string_expr"
+                  },
+                  "_type": "relational_op_expr"
                 },
-                "_type": "relational_op_expr"
+                "_type": "logical_op_expr"
               },
               "rhs": {
                 "operator": "==",
@@ -118,74 +150,46 @@ func TestNestedLogicalOp(t *testing.T) {
               "_type": "logical_op_expr"
             },
             "rhs": {
-              "expr": {
-                "operator": "or",
-                "lhs": {
-                  "operator": "==",
-                  "lhs": {
-                    "func": null,
-                    "receiver": {
-                      "value": "logline",
-                      "_type": "ident_expr"
+              "operator": "==",
+              "lhs": {
+                "func": null,
+                "receiver": {
+                  "func": null,
+                  "receiver": {
+                    "value": "logline",
+                    "_type": "ident_expr"
+                  },
+                  "method": "get",
+                  "args": [
+                    {
+                      "value": "action",
+                      "_type": "string_expr"
                     },
-                    "method": "get",
-                    "args": [
-                      {
-                        "value": "event.severity",
-                        "_type": "string_expr"
-                      },
-                      {
-                        "value": "",
-                        "_type": "string_expr"
-                      }
-                    ],
-                    "adjust_ret": false,
-                    "_type": "func_call_expr"
-                  },
-                  "rhs": {
-                    "value": "error",
-                    "_type": "string_expr"
-                  },
-                  "_type": "relational_op_expr"
+                    {
+                      "value": "",
+                      "_type": "string_expr"
+                    }
+                  ],
+                  "adjust_ret": false,
+                  "_type": "func_call_expr"
                 },
-                "rhs": {
-                  "expr": {
-                    "func": null,
-                    "receiver": {
-                      "func": null,
-                      "receiver": {
-                        "value": "logline",
-                        "_type": "ident_expr"
-                      },
-                      "method": "get",
-                      "args": [
-                        {
-                          "value": "event.uuid",
-                          "_type": "string_expr"
-                        },
-                        {
-                          "value": "",
-                          "_type": "string_expr"
-                        }
-                      ],
-                      "adjust_ret": false,
-                      "_type": "func_call_expr"
-                    },
-                    "method": "contains",
-                    "args": [
-                      {
-                        "value": "m",
-                        "_type": "string_expr"
-                      }
-                    ],
-                    "adjust_ret": false,
-                    "_type": "func_call_expr"
-                  },
-                  "_type": "unary_not_op_expr"
-                },
-                "_type": "logical_op_expr"
+                "method": "lower",
+                "args": null,
+                "adjust_ret": false,
+                "_type": "func_call_expr"
               },
-              "_type": "unary_not_op_expr"
+              "rhs": {
+                "func": null,
+                "receiver": {
+                  "value": "1234",
+                  "_type": "string_expr"
+                },
+                "method": "lower",
+                "args": null,
+                "adjust_ret": false,
+                "_type": "func_call_expr"
+              },
+              "_type": "relational_op_expr"
             },
             "_type": "logical_op_expr"
           },
