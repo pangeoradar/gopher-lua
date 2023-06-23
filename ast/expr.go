@@ -198,7 +198,8 @@ func (f *FuncCallExpr) String() string {
 	var body string
 	if f.Receiver != nil {
 		receiver := "%s"
-		if _, ok := f.Receiver.(*StringExpr); ok {
+		switch f.Receiver.(type) {
+		case *StringExpr, *LogicalOpExpr:
 			receiver = "(%s)"
 		}
 		body = fmt.Sprintf("%s:%s", fmt.Sprintf(receiver, f.Receiver), f.Method)
