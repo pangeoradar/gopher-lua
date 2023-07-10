@@ -621,24 +621,25 @@ func init() {
 				if v2, ok2 := rhs.assertFloat64(); ok2 {
 					ret = v1 <= v2
 				} else {
-					L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
+					//L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
 				}
 			} else {
-				if lhs.Type() != rhs.Type() {
-					L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
-				}
-				switch lhs.Type() {
-				case LTString:
-					ret = strCmp(string(lhs.(LString)), string(rhs.(LString))) <= 0
-				default:
-					switch objectRational(L, lhs, rhs, "__le") {
-					case 1:
-						ret = true
-					case 0:
-						ret = false
+				if lhs.Type() == rhs.Type() {
+					switch lhs.Type() {
+					case LTString:
+						ret = strCmp(string(lhs.(LString)), string(rhs.(LString))) <= 0
 					default:
-						ret = !objectRationalWithError(L, rhs, lhs, "__lt")
+						switch objectRational(L, lhs, rhs, "__le") {
+						case 1:
+							ret = true
+						case 0:
+							ret = false
+						default:
+							ret = !objectRationalWithError(L, rhs, lhs, "__lt")
+						}
 					}
+				} else {
+					//L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
 				}
 			}
 
@@ -1648,10 +1649,10 @@ func lessThan(L *LState, lhs, rhs LValue) bool {
 		if v2, ok2 := rhs.assertFloat64(); ok2 {
 			return v1 < v2
 		}
-		L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
+		//L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
 	}
 	if lhs.Type() != rhs.Type() {
-		L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
+		//L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
 		return false
 	}
 	ret := false
@@ -1705,7 +1706,7 @@ func objectRationalWithError(L *LState, lhs, rhs LValue, event string) bool {
 	case 0:
 		return false
 	}
-	L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
+	//L.RaiseError("attempt to compare %v with %v", lhs.Type().String(), rhs.Type().String())
 	return false
 }
 
