@@ -1244,6 +1244,9 @@ func compileExpr(context *funcContext, reg int, expr ast.Expr, ec *expcontext) i
 			}
 		}
 		return sused
+	case *ast.BitwiseOpExpr:
+		compileBiwiseOpExpr(context, reg, ex, ec)
+		return sused
 	default:
 		panic(fmt.Sprintf("expr %v not implemented.", reflect.TypeOf(ex).Elem().Name()))
 	}
@@ -1868,4 +1871,34 @@ func Compile(chunk []ast.Stmt, name string) (proto *FunctionProto, err error) { 
 	compileFunctionExpr(context, funcexpr, ecnone(0))
 	proto = context.Proto
 	return
+} // }}}
+
+func compileBiwiseOpExpr(context *funcContext, reg int, expr *ast.BitwiseOpExpr, ec *expcontext) { // {{{
+	exp := constFold(expr)
+	if ex, ok := exp.(*constLValueExpr); ok {
+		exp.SetLine(sline(expr))
+		compileExpr(context, reg, ex, ec)
+		return
+	}
+	expr, _ = exp.(*ast.BitwiseOpExpr)
+	a := savereg(ec, reg)
+	b := reg
+	compileExprWithKMVPropagation(context, expr.Lhs, &reg, &b)
+	c := reg
+	compileExprWithKMVPropagation(context, expr.Rhs, &reg, &c)
+
+	op := 0
+	switch expr.Operator {
+	case "|":
+		op = OP_BITOR
+	case "&":
+		op = OP_BITAND
+	case "^":
+		op = OP_BITXOR
+	case "<<":
+		op = OP_LEFT_SHIFT
+	case ">>":
+		op = OP_RIGHT_SHIFT
+	}
+	context.Code.AddABC(op, a, b, c, sline(expr))
 } // }}}

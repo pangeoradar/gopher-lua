@@ -1503,6 +1503,11 @@ func init() {
 			}
 			return 0
 		},
+		opBitwise, // OP_BITOR
+		opBitwise, // OP_BITAND
+		opBitwise, // OP_BITXOR
+		opBitwise, // OP_LEFT_SHIFT
+		opBitwise, // OP_RIGHT_SHIFT
 		func(L *LState, inst uint32, baseframe *callFrame) int { //OP_NOP
 			return 0
 		},
@@ -1527,6 +1532,33 @@ func opArith(L *LState, inst uint32, baseframe *callFrame) int { //OP_ADD, OP_SU
 	} else {
 		reg.Set(RA, objectArith(L, opcode, lhs, rhs))
 	}
+	return 0
+}
+
+func opBitwise(L *LState, inst uint32, _ *callFrame) int {
+	reg := L.reg
+	cf := L.currentFrame
+	lbase := cf.LocalBase
+	A := int(inst>>18) & 0xff //GETA
+	RA := lbase + A
+	opcode := int(inst >> 26) //GETOPCODE
+	B := int(inst & 0x1ff)    //GETB
+	C := int(inst>>9) & 0x1ff //GETC
+
+	lhs := L.rkValue(B)
+	v1, ok1 := lhs.assertFloat64()
+	if !ok1 {
+		L.RaiseError("invalid bitwise left operand: %v", lhs)
+		return 0
+	}
+
+	rhs := L.rkValue(C)
+	v2, ok2 := rhs.assertFloat64()
+	if !ok2 {
+		L.RaiseError("invalid bitwise right operand: %v", rhs)
+		return 0
+	}
+	reg.SetNumber(RA, numberBitwise(L, opcode, LNumber(v1), LNumber(v2)))
 	return 0
 }
 
@@ -1559,6 +1591,27 @@ func numberArith(L *LState, opcode int, lhs, rhs LNumber) LNumber {
 	}
 	panic("should not reach here")
 	return LNumber(0)
+}
+
+func numberBitwise(L *LState, opcode int, lhs, rhs LNumber) LNumber {
+	return LNumber(integerBitwise(L, opcode, uint64(lhs), uint64(rhs)))
+}
+
+func integerBitwise(L *LState, opcode int, lhs uint64, rhs uint64) uint64 {
+	switch opcode {
+	case OP_BITOR:
+		return lhs | rhs
+	case OP_BITAND:
+		return lhs & rhs
+	case OP_BITXOR:
+		return lhs ^ rhs
+	case OP_LEFT_SHIFT:
+		return lhs << rhs
+	case OP_RIGHT_SHIFT:
+		return lhs >> rhs
+	}
+	L.RaiseError("invalid bitwise operator: %d", opcode)
+	return 0
 }
 
 func objectArith(L *LState, opcode int, lhs, rhs LValue) LValue {
