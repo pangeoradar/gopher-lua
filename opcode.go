@@ -95,6 +95,12 @@ const (
 
 	OP_VARARG /*     A B     R(A) R(A+1) ... R(A+B-1) = vararg            */
 
+	OP_BITOR       /*       A B C   R(A) := RK(B) | RK(C)  */
+	OP_BITAND      /*       A B C   R(A) := RK(B) & RK(C)  */
+	OP_BITXOR      /*       A B C   R(A) := RK(B) ^ RK(C)  */
+	OP_LEFT_SHIFT  /*       A B C   R(A) := RK(B) << RK(C) */
+	OP_RIGHT_SHIFT /*       A B C   R(A) := RK(B) >> RK(C) */
+
 	OP_NOP /* NOP */
 )
 const opCodeMax = OP_NOP
@@ -167,6 +173,11 @@ var opProps = []opProp{
 	opProp{"CLOSE", false, false, opArgModeN, opArgModeN, opTypeABC},
 	opProp{"CLOSURE", false, true, opArgModeU, opArgModeN, opTypeABx},
 	opProp{"VARARG", false, true, opArgModeU, opArgModeN, opTypeABC},
+	opProp{"BITOR", false, true, opArgModeK, opArgModeK, opTypeABC},
+	opProp{"BITAND", false, true, opArgModeK, opArgModeK, opTypeABC},
+	opProp{"BITXOR", false, true, opArgModeK, opArgModeK, opTypeABC},
+	opProp{"LEFT_SHIFT", false, true, opArgModeK, opArgModeK, opTypeABC},
+	opProp{"RIGHT_SHIFT", false, true, opArgModeK, opArgModeK, opTypeABC},
 	opProp{"NOP", false, false, opArgModeR, opArgModeN, opTypeASbx},
 }
 
@@ -364,6 +375,16 @@ func opToString(inst uint32) string {
 		buf += fmt.Sprintf("; R(%v) := closure(KPROTO[%v] R(%v) ... R(%v+n))", arga, argbx, arga, arga)
 	case OP_VARARG:
 		buf += fmt.Sprintf(";  R(%v) R(%v+1) ... R(%v+%v-1) = vararg", arga, arga, arga, argb)
+	case OP_BITOR:
+		buf += fmt.Sprintf("; R(%v) := RK(%v) | RK(%v)", arga, argb, argc)
+	case OP_BITAND:
+		buf += fmt.Sprintf("; R(%v) := RK(%v) & RK(%v)", arga, argb, argc)
+	case OP_BITXOR:
+		buf += fmt.Sprintf("; R(%v) := RK(%v) ^ RK(%v)", arga, argb, argc)
+	case OP_LEFT_SHIFT:
+		buf += fmt.Sprintf("; R(%v) := RK(%v) << RK(%v)", arga, argb, argc)
+	case OP_RIGHT_SHIFT:
+		buf += fmt.Sprintf("; R(%v) := RK(%v) >> RK(%v)", arga, argb, argc)
 	case OP_NOP:
 		/* nothing to do */
 	}

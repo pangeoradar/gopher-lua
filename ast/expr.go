@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"strings"
 )
 
 type Expr interface {
@@ -625,6 +626,8 @@ func unmarshalExpr(data []byte) (Expr, error) {
 		e = &UnaryLenOpExpr{}
 	case "function_expr":
 		e = &FunctionExpr{}
+	case "bitwise_op_expr":
+		e = &BitwiseOpExpr{}
 	default:
 		return nil, fmt.Errorf("unsupported expr: %s", t.String())
 	}
@@ -633,4 +636,48 @@ func unmarshalExpr(data []byte) (Expr, error) {
 		return nil, fmt.Errorf("expr unmarshal error: %w", err)
 	}
 	return e, nil
+}
+
+type BitwiseOpExpr struct {
+	ExprBase
+
+	Operator string `json:"operator"`
+	Lhs      Expr   `json:"lhs"`
+	Rhs      Expr   `json:"rhs"`
+}
+
+func (e *BitwiseOpExpr) String() string {
+	return fmt.Sprintf("%s %s %s", e.Lhs, e.Operator, e.Rhs)
+}
+
+func (e *BitwiseOpExpr) UnmarshalJSON(bytes []byte) error {
+	var temp struct {
+		Operator string          `json:"operator"`
+		Lhs      json.RawMessage `json:"lhs"`
+		Rhs      json.RawMessage `json:"rhs"`
+	}
+
+	err := json.Unmarshal(bytes, &temp)
+	if err != nil {
+		return fmt.Errorf("bitwise_op_expr: failed to unmarshal: %w", err)
+	}
+
+	// todo: make constant operators
+	*e = BitwiseOpExpr{Operator: temp.Operator}
+
+	e.Lhs, err = unmarshalExpr(temp.Lhs)
+	if err != nil {
+		return fmt.Errorf("bitwise_op_expr: failed to unmarshal field lhs: %w", err)
+	}
+
+	e.Rhs, err = unmarshalExpr(temp.Rhs)
+	if err != nil {
+		return fmt.Errorf("bitwise_op_expr: failed to unmarshal field rhs: %w", err)
+	}
+
+	return nil
+}
+
+func (e *BitwiseOpExpr) MarshalJSON() ([]byte, error) {
+	return marshalWithType(e, "bitwise_op_expr")
 }
