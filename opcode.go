@@ -97,7 +97,7 @@ const (
 
 	OP_BITOR       /*       A B C   R(A) := RK(B) | RK(C)  */
 	OP_BITAND      /*       A B C   R(A) := RK(B) & RK(C)  */
-	OP_BITXOR      /*       A B C   R(A) := RK(B) ^ RK(C)  */
+	OP_BITXOR      /*       A B C   R(A) := RK(B) ~ RK(C)  */
 	OP_LEFT_SHIFT  /*       A B C   R(A) := RK(B) << RK(C) */
 	OP_RIGHT_SHIFT /*       A B C   R(A) := RK(B) >> RK(C) */
 

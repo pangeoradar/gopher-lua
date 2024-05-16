@@ -1893,7 +1893,7 @@ func compileBiwiseOpExpr(context *funcContext, reg int, expr *ast.BitwiseOpExpr,
 		op = OP_BITOR
 	case "&":
 		op = OP_BITAND
-	case "^":
+	case "~":
 		op = OP_BITXOR
 	case "<<":
 		op = OP_LEFT_SHIFT
