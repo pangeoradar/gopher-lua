@@ -55,7 +55,7 @@ import (
 %token<token> TAnd TBreak TDo TElse TElseIf TEnd TFalse TFor TFunction TIf TIn TLocal TNil TNot TOr TReturn TRepeat TThen TTrue TUntil TWhile TGoto
 
 /* Literals */
-%token<token> TEqeq TNeq TLte TGte T2Comma T3Comma T2Colon TIdent TNumber TString '{' '('
+%token<token> TEqeq TNeq TLte TGte T2Comma T3Comma T2Colon TIdent TNumber TString '{' '(' TRightShift TLeftShift
 
 /* Operators */
 %left TOr
@@ -66,6 +66,8 @@ import (
 %left '*' '/' '%'
 %right UNARY /* not # -(unary) */
 %right '^'
+%left '&' '|' '~'
+%right TRightShift TLeftShift
 
 %%
 
@@ -372,6 +374,26 @@ expr:
         } |
         expr '^' expr {
             $$ = &ast.ArithmeticOpExpr{Lhs: $1, Operator: "^", Rhs: $3}
+            $$.SetLine($1.Line())
+        } |
+        expr '&' expr {
+            $$ = &ast.BitwiseOpExpr{Lhs: $1, Operator: "&", Rhs: $3}
+            $$.SetLine($1.Line())
+        } |
+        expr '|' expr {
+            $$ = &ast.BitwiseOpExpr{Lhs: $1, Operator: "|", Rhs: $3}
+            $$.SetLine($1.Line())
+        } |
+        expr '~' expr {
+            $$ = &ast.BitwiseOpExpr{Lhs: $1, Operator: "~", Rhs: $3}
+            $$.SetLine($1.Line())
+        } |
+        expr TRightShift expr {
+            $$ = &ast.BitwiseOpExpr{Lhs: $1, Operator: ">>", Rhs: $3}
+            $$.SetLine($1.Line())
+        } |
+        expr TLeftShift expr {
+            $$ = &ast.BitwiseOpExpr{Lhs: $1, Operator: "<<", Rhs: $3}
             $$.SetLine($1.Line())
         } |
         '-' expr %prec UNARY {
