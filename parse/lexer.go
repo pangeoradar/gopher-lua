@@ -16,9 +16,6 @@ const EOF = -1
 const whitespace1 = 1<<'\t' | 1<<' '
 const whitespace2 = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
 
-// const TLeftShift = 57379
-// const TRightShift = 57380
-
 type Error struct {
 	Pos     ast.Position
 	Message string
