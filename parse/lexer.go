@@ -16,6 +16,9 @@ const EOF = -1
 const whitespace1 = 1<<'\t' | 1<<' '
 const whitespace2 = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
 
+// const TLeftShift = 57379
+// const TRightShift = 57380
+
 type Error struct {
 	Pos     ast.Position
 	Message string
@@ -369,21 +372,33 @@ redo:
 				tok.Str = "~="
 				sc.Next()
 			} else {
-				err = sc.Error("~", "Invalid '~' token")
+				// XOR
+				tok.Type = ch
+				tok.Str = string(rune(ch))
 			}
 		case '<':
-			if sc.Peek() == '=' {
+			nextCh := sc.Peek()
+			if nextCh == '=' {
 				tok.Type = TLte
 				tok.Str = "<="
+				sc.Next()
+			} else if nextCh == '<' {
+				tok.Type = TLeftShift
+				tok.Str = "<<"
 				sc.Next()
 			} else {
 				tok.Type = ch
 				tok.Str = string(rune(ch))
 			}
 		case '>':
-			if sc.Peek() == '=' {
+			nextCh := sc.Peek()
+			if nextCh == '=' {
 				tok.Type = TGte
 				tok.Str = ">="
+				sc.Next()
+			} else if nextCh == '>' {
+				tok.Type = TRightShift
+				tok.Str = ">>"
 				sc.Next()
 			} else {
 				tok.Type = ch
@@ -418,7 +433,7 @@ redo:
 				tok.Type = ch
 				tok.Str = string(rune(ch))
 			}
-		case '+', '*', '/', '%', '^', '#', '(', ')', '{', '}', ']', ';', ',':
+		case '+', '*', '/', '%', '^', '#', '(', ')', '{', '}', ']', ';', ',', '&', '|':
 			tok.Type = ch
 			tok.Str = string(rune(ch))
 		default:
